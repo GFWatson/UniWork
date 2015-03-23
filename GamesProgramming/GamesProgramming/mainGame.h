@@ -26,7 +26,7 @@ private:
 	void initShaders();
 	void gameLoop();
 	void processInput();
-	void collisionDetection(float* x, float* y, float* width, float* height);
+	void collisionDetection(Sprite* player);
 	void moderateFPS();
 	void drawGame();
 
@@ -44,15 +44,6 @@ private:
 	glm::mat4 _pMatrix, _mMatrix;
 
 	float _accX, _decX, _accY, _maxSpeedX, _maxSpeedY, _jumpSpeed;
-
-	float* _x;
-	float* _y;
-	float* _width;
-	float* _height;
-	float* _x2;
-	float* _y2;
-	float* _width2;
-	float* _height2;
 
 	Camera _camera;
 

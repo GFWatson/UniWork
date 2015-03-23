@@ -87,10 +87,10 @@ void Sprite::init(float x, float y, float width, float height, GLTexture tex) {
 }
 
 void Sprite::get(float* x, float* y, float* width, float* height) {
-	x = &_x;
-	y = &_y;
-	width = &_width;
-	height = &_height;
+	*x = _x;
+	*y = _y;
+	*width = _width;
+	*height = _height;
 }
 
 void Sprite::set(float delta, float x, float y) {
