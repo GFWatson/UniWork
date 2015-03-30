@@ -15,7 +15,7 @@ _window(nullptr),
 _fps(0.0f), _maxFPS(60.0f), _currentTime(0.0f), _prevTime(0.0f), _deltaTime(0.0f),
 _accX(0.2f * _maxFPS), _decX(0.3f * _maxFPS), _accY(-0.5f * _maxFPS), _maxSpeedX(5.0f * _maxFPS), _maxSpeedY(-10.0f * _maxFPS), _jumpSpeed(8.0f * _maxFPS),
 _state(gameState::PLAY),
-_oneState(playerState::STANDR), _oneCollision(collisionState::NONE), _oneRunTime(0.0f), _oneAttackTime(0.0f), _oneSpeedX(0.0f), _oneSpeedY(0.0f), _oneMoveRequest(false)
+_oneState(playerState::STANDR), _oneRunTime(0.0f), _oneAttackTime(0.0f), _oneSpeedX(0.0f), _oneSpeedY(0.0f), _oneMoveRequest(false)
 {
 	_camera.init(_screenWidth, _screenHeight);
 }
@@ -54,13 +54,23 @@ void mainGame::run()
 
 	_texture = _defaultTexture;
 
-	_playerOne.init(50.0f, 50.0f, 48.0f, 64.0f, _standingTexture);
-	_floor.init(0.0f, 0.0f, 1024.0f, 20.0f, _defaultTexture);
+	_playerOne.init(50.0f, 50.0f, 48.0f, 64.0f, _standingTexture, _oneState);
+	_floor.init(0.0f, 0.0f, 1024.0f, 20.0f, _defaultTexture, playerState::ENVIR);
+	
 
 	_sceneList.push_back(&_playerOne);
 	_sceneList.push_back(&_floor);
 
+	//addPlatform();
+
+	
+
 	gameLoop();
+	/*
+	for (int i = 0; i < _sceneList.size(); i++) {
+		delete[] _sceneList[i];
+	}
+	*/
 }
 
 
@@ -113,11 +123,9 @@ void mainGame::gameLoop()
 		_currentTime = SDL_GetTicks();
 		_deltaTime = _currentTime - _prevTime;
 		processInput();
-		//std::cout << _oneSpeedX << std::endl;
-		//std::cout << _oneSpeedY << std::endl;
-		std::cout << "x = " << _oneSpeedX << std::endl;
 		_playerOne.set(_deltaTime, _oneSpeedX, _oneSpeedY);
 		collisionDetection(&_playerOne);
+		//addPlatform(200.0f, 200.0f);
 		drawGame();
 		//moderateFPS();
 		_prevTime = _currentTime;
@@ -331,30 +339,26 @@ void mainGame::processInput()
 		case SDL_KEYUP:
 			switch (evnt.key.keysym.sym) {
 			case SDLK_d:
-				_oneState = playerState::STANDR;
-				_oneMoveRequest = false;
-				_playerOne.setTexture(_standingTexture);
-				_oneRunTime = 0.0f;
+				if (_oneState != playerState::JUMPR && _oneState != playerState::JUMPL) {
+					_oneState = playerState::STANDR;
+					_oneMoveRequest = false;
+					_playerOne.setTexture(_standingTexture);
+					_oneRunTime = 0.0f;
+				}
 				break;
 			case SDLK_a:
-				_oneState = playerState::STANDL;
-				_oneMoveRequest = false;
-				_playerOne.setTexture(_standingTexture);
-				_oneRunTime = 0.0f;
+				if (_oneState != playerState::JUMPR && _oneState != playerState::JUMPL) {
+					_oneState = playerState::STANDL;
+					_oneMoveRequest = false;
+					_playerOne.setTexture(_standingTexture);
+					_oneRunTime = 0.0f;
+				}
 				break;
 			case SDLK_w:
-				if (_oneState == playerState::JUMPR) {
-					_oneState = playerState::STANDR;
-					_playerOne.setTexture(_standingTexture);
-					_oneRunTime = 0.0f;
-				}
-				else {
-					_oneState = playerState::STANDL;
-					_playerOne.setTexture(_standingTexture);
-					_oneRunTime = 0.0f;
-				}
+				_oneRunTime = 0.0f;
 				break;
 			case SDLK_s:
+				_oneMoveRequest = false;
 				if (_oneState == playerState::CROUCHR || _oneState == playerState::LOWKR) {
 					_oneState = playerState::STANDR;
 					_playerOne.setTexture(_standingTexture);
@@ -386,15 +390,15 @@ void mainGame::processInput()
 	if (_oneSpeedY < _maxSpeedY) _oneSpeedY = _maxSpeedY;
 
 	// allows players to stand still
-	if (_oneSpeedX > 0 && _oneSpeedX < _decX) _oneSpeedX = 0;
-	if (_oneSpeedX < 0 && _oneSpeedX > -_decX) _oneSpeedX = 0;
+	if (_oneSpeedX > 0 && _oneSpeedX < 5.0f) _oneSpeedX = 0;
+	if (_oneSpeedX < 0 && _oneSpeedX > -5.0f) _oneSpeedX = 0;
 
 	// horizontal decceleration
 	if (!_oneMoveRequest) {
-		if (_oneSpeedX > 0.0f) {
+		if (_oneSpeedX > _decX) {
 			_oneSpeedX -= _decX;
 		}
-		else if (_oneSpeedX < 0.0f) {
+		else if (_oneSpeedX < -_decX) {
 			_oneSpeedX += _decX;
 		}
 	}
@@ -403,14 +407,8 @@ void mainGame::processInput()
 
 void mainGame::collisionDetection(Sprite* player) {
 	for (int i = 0; i < _sceneList.size(); i++) {
-		float x;
-		float y;
-		float width;
-		float height;
-		float x2;
-		float y2;
-		float width2;
-		float height2;
+		// get bounding boxes of both
+		float x, y, width, height, x2, y2, width2, height2;
 		player->get(&x, &y, &width, &height);
 		_sceneList[i]->get(&x2, &y2, &width2, &height2);
 
@@ -425,19 +423,56 @@ void mainGame::collisionDetection(Sprite* player) {
 		else {
 			// hit at bottom
 			if (!(y >= height2)) {
-				player->set(1000.0f, 0.0f, (height2 - y));
+				// get collision points of player
+				float a, b, c, d;
+				player->getColPoints(&a, &b, &c, &d, 0);
+				// check for collision
+				if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
+					// move back
+					player->set(1000.0f, 0.0f, (height2 - y));
+					// allow jumping again
+					if (_oneState == playerState::JUMPR) {
+						_oneState = playerState::STANDR;
+						_playerOne.setTexture(_standingTexture);
+					}
+					else if (_oneState == playerState::JUMPL) {
+						_oneState = playerState::STANDL;
+						_playerOne.setTexture(_standingTexture);
+					}
+				}
 			}
 			// hit at top
 			else if (!(height <= y2)) {
-
+				// get collision points of player
+				float a, b, c, d;
+				player->getColPoints(&a, &b, &c, &d, 1);
+				// check for collision
+				if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
+					// move back
+					player->set(1000.0f, 0.0f, (y2 - height));
+				}
 			}
 			// hit at left
 			else if (!(x >= width2)) {
-
+				// get collision points of player
+				float a, b, c, d;
+				player->getColPoints(&a, &b, &c, &d, 2);
+				// check for collision
+				if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
+					// move back
+					player->set(1000.0f, 0.0f, (y2 - height));
+				}
 			}
 			// hit at right
 			else {
-
+				// get collision points of player
+				float a, b, c, d;
+				player->getColPoints(&a, &b, &c, &d, 3);
+				// check for collision
+				if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
+					// move back
+					player->set(1000.0f, 0.0f, (y2 - height));
+				}
 			}
 				
 		}
@@ -447,6 +482,12 @@ void mainGame::collisionDetection(Sprite* player) {
 
 void mainGame::moderateFPS() {
 	
+}
+
+void mainGame::addPlatform(float x, float y) {
+	Sprite platform;
+	platform.init(x, y, 50, 50, _defaultTexture, playerState::ENVIR);
+	_sceneList.push_back(&platform);
 }
 
 void mainGame::drawGame() {

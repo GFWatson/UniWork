@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <iostream>
 
-Sprite::Sprite() : _vboID(0)
+Sprite::Sprite() : _vboID(0), _vao(0)
 {
 	
 }
@@ -17,7 +17,7 @@ Sprite::~Sprite()
 	}
 }
 
-void Sprite::init(float x, float y, float width, float height, GLTexture tex) {
+void Sprite::init(float x, float y, float width, float height, GLTexture tex, playerState state) {
 	_x = x;
 	_y = y;
 	_width = width;
@@ -26,6 +26,8 @@ void Sprite::init(float x, float y, float width, float height, GLTexture tex) {
 	_transformY = y;
 
 	_texture = tex;
+
+	_state = state;
 
 	// create vao
 	if (_vao == 0) {
@@ -84,6 +86,102 @@ void Sprite::init(float x, float y, float width, float height, GLTexture tex) {
 	// reset width and height to positions
 	_width += _x;
 	_height += _y;
+
+	// set collision points
+	setColPoints();
+
+}
+
+void Sprite::setColPoints() {
+	static float hor = (_width - _x) / 3;
+	static float ver = (_height - _y) / 3;
+
+ 	for (int x = 0; x < 8; x++) {
+		switch (x){
+		// bottom
+		case 0:
+			_colPoints[x][0] = _x + hor;
+			_colPoints[x][1] = _y;
+			break;
+		case 1:
+			_colPoints[x][0] = _x + (hor * 2);
+			_colPoints[x][1] = _y;
+			break;
+		// top
+		case 2:
+			_colPoints[x][0] = _x + hor;
+			_colPoints[x][1] = _height;
+			break;
+		case 3:
+			_colPoints[x][0] = _x + (hor * 2);
+			_colPoints[x][1] = _height;
+			break;
+		// left
+		case 4:
+			_colPoints[x][0] = _x;
+			_colPoints[x][1] = _y + ver;
+			break;
+		case 5:
+			_colPoints[x][0] = _x;
+			_colPoints[x][1] = _y + (ver * 2);
+			break;
+		// right
+		case 6:
+			_colPoints[x][0] = _width;
+			_colPoints[x][1] = _y + ver;
+			break;
+		case 7:
+			_colPoints[x][0] = _width;
+			_colPoints[x][1] = _y + (ver * 2);
+			break;
+
+		default:
+			_colPoints[x][0] = 0.0f;
+			_colPoints[x][1] = 0.0f;
+			break;
+		}
+
+	}
+}
+
+void Sprite::getColPoints(float* a, float* b, float* c, float* d, int side) {
+	switch (side){
+	// bottom
+	case 0:
+		*a = _colPoints[0][0];
+		*b = _colPoints[0][1];
+		*c = _colPoints[1][0];
+		*d = _colPoints[1][1];
+		break;
+	// top
+	case 1:
+		*a = _colPoints[2][0];
+		*b = _colPoints[2][1];
+		*c = _colPoints[3][0];
+		*d = _colPoints[3][1];
+		break;
+	// left
+	case 2:
+		*a = _colPoints[4][0];
+		*b = _colPoints[4][1];
+		*c = _colPoints[5][0];
+		*d = _colPoints[5][1];
+		break;
+	// right
+	case 3:
+		*a = _colPoints[6][0];
+		*b = _colPoints[6][1];
+		*c = _colPoints[7][0];
+		*d = _colPoints[7][1];
+		break;
+
+	default:
+		*a = 0.0f;
+		*b = 0.0f;
+		*c = 0.0f;
+		*d = 0.0f;
+		break;
+	}
 }
 
 void Sprite::get(float* x, float* y, float* width, float* height) {
@@ -101,6 +199,7 @@ void Sprite::set(float delta, float x, float y) {
 	_transformX = (x * (delta / 1000.0f));
 	_transformY = (y * (delta / 1000.0f));
 	_mMatrix = glm::translate(_mMatrix, glm::vec3(_transformX, _transformY, 0.0));
+	setColPoints();
 }
 
 GLTexture Sprite::getTexture() {

@@ -8,10 +8,9 @@
 #include "GLSLProgram.h"
 #include "GLTexture.h"
 #include "Camera.h"
+#include "PlayerState.h"
 
 enum class gameState{ PLAY, EXIT };
-enum class playerState{ STANDR, STANDL, RUNR, CROUCHR, LOWKR, BLOCKR, PUNCHR, JUMPR, HIGHKR, RUNL, CROUCHL, LOWKL, BLOCKL, PUNCHL, JUMPL, HIGHKL };
-enum class collisionState{ NONE, FLOOR };
 
 class mainGame
 {
@@ -28,6 +27,7 @@ private:
 	void processInput();
 	void collisionDetection(Sprite* player);
 	void moderateFPS();
+	void addPlatform(float x, float y);
 	void drawGame();
 
 	SDL_Window* _window;
@@ -49,7 +49,6 @@ private:
 
 	Sprite _playerOne;
 	playerState _oneState;
-	collisionState _oneCollision;
 	float _oneRunTime;
 	float _oneAttackTime;
 	float _oneSpeedX, _oneSpeedY;

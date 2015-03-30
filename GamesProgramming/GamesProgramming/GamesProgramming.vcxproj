@@ -89,6 +89,7 @@
     <ClInclude Include="IOManager.h" />
     <ClInclude Include="mainGame.h" />
     <ClInclude Include="picoPNG.h" />
+    <ClInclude Include="PlayerState.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="sprites.h" />
     <ClInclude Include="Vertex.h" />
