@@ -27,7 +27,9 @@ private:
 	void processInput();
 	void collisionDetection(Sprite* player);
 	void moderateFPS();
-	void addPlatform(float x, float y);
+	void platformGenerator();
+	void moveScene();
+	void setScale(Sprite* player);
 	void drawGame();
 
 	SDL_Window* _window;
@@ -45,16 +47,29 @@ private:
 
 	float _accX, _decX, _accY, _maxSpeedX, _maxSpeedY, _jumpSpeed;
 
+	int _round;
+
 	Camera _camera;
 
+	SDL_GameController* _controller1;
+
 	Sprite _playerOne;
-	playerState _oneState;
-	float _oneRunTime;
-	float _oneAttackTime;
+	float _oneRunTime, _oneAttackTime, _oneSlideTime;
 	float _oneSpeedX, _oneSpeedY;
 	bool _oneMoveRequest;
 
+	Sprite _playerTwo;
+	float _twoRunTime, _twoAttackTime, _twoSlideTime;
+	float _twoSpeedX, _twoSpeedY;
+	bool _twoMoveRequest;
+
 	Sprite _floor;
+
+	Sprite _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17, _p18, _p19, _p20, _p21;
+
+	float _pTime;
+	float _lTime1, _lTime2, _lTime3, _lTime4, _lTime5, _lTime6, _lTime7;
+	float _l1, _l2, _l3, _l4, _l5, _l6, _l7;
 
 	GLSLProgram _colourProgram;
 	GLTexture _defaultTexture;

@@ -91,7 +91,6 @@
     <ClInclude Include="picoPNG.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="Sprite.h" />
-    <ClInclude Include="sprites.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -16,13 +16,18 @@ public:
 
 	void init(float x, float y, float width, float height, GLTexture tex, playerState state);
 	void setColPoints();
-	void getColPoints(float* a, float* b, float* c, float* d, int side);
+	void getColPoints(float* a, float* b, float* c, float* d, float* e, float* f, int side);
 	void get(float* x, float* y, float* width, float* height);
 	void set(float delta, float x, float y);
+	void setPos(float x, float y);
+	void setScale(float x, float y);
 	GLTexture getTexture();
 	void setTexture(GLTexture tex);
 	glm::mat4 getModel();
+	void setState(playerState state);
+	playerState getState();
 	void draw();
+	bool offScreenLeft();
 
 private:
 	float _x;
@@ -30,16 +35,22 @@ private:
 	float _width;
 	float _height;
 
+	float _currentWidth;
+	float _currentHeight;
+	float _scaleX;
+	float _scaleY;
 	float _transformX;
 	float _transformY;
 
-	float _colPoints[8][2];
+	float _colPoints[10][2];
 
 	playerState _state;
 
 	GLTexture _texture;
 	GLuint _vboID;
 	GLuint _vao;
+	glm::mat4 _transMat;
+	glm::mat4 _scaleMat;
 	glm::mat4 _mMatrix;
 };
 
