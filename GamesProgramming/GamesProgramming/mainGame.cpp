@@ -187,7 +187,6 @@ void mainGame::gameLoop()
 		collisionDetection(&_playerOne);
 		collisionDetection(&_playerTwo);
 		drawGame();
-		//moderateFPS();
 		_prevTime = _currentTime;
 
 	}
@@ -781,13 +780,18 @@ void mainGame::collisionDetection(Sprite* player) {
 			// bottom
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
 				// move back
+				
+				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HIT) {
+					continue;
+				}
+				
 				player->set(1000.0f, 0.0f, (height2 - y));
 				// allow jumping again
-				if (player->getState() == playerState::JUMPR) {
+				if (player->getState() == playerState::JUMPR || player->getState() == playerState::HIGHKR) {
 					player->setState(playerState::STANDR);
 					player->setTexture(_standingTexture);
 				}
-				else if (player->getState() == playerState::JUMPL) {
+				else if (player->getState() == playerState::JUMPL || player->getState() == playerState::HIGHKL) {
 					player->setState(playerState::STANDL);
 					player->setTexture(_standingTexture);
 				}
@@ -797,6 +801,11 @@ void mainGame::collisionDetection(Sprite* player) {
 			//top
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
 				// move back
+				
+				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HIT) {
+					continue;
+				}
+				
 				player->set(1000.0f, 0.0f, (y2 - height));
 			}
 			player->getColPoints(&a, &b, &c, &d, &e, &f, 2);
@@ -804,6 +813,10 @@ void mainGame::collisionDetection(Sprite* player) {
 			// left
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2)) || ((e >= x2 && e <= width2) && (f >= y2 && f <= height2))) {
 				// move back
+				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HIT) {
+					playerCollision(player, _sceneList[i], 0);
+					continue;
+				}
 				player->set(1000.0f, (width2 - x), 0.0f);
 			}
 			player->getColPoints(&a, &b, &c, &d, &e, &f, 3);
@@ -811,6 +824,10 @@ void mainGame::collisionDetection(Sprite* player) {
 			// right
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2)) || ((e >= x2 && e <= width2) && (f >= y2 && f <= height2))) {
 				// move back
+				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HIT) {
+					playerCollision(player, _sceneList[i], 1);
+					continue;
+				}
 				player->set(1000.0f, (x2 - width + 2.0f), 0.0f);
 			}
 		}
@@ -824,8 +841,57 @@ void mainGame::collisionDetection(Sprite* player) {
 
 }
 
-void mainGame::moderateFPS() {
-	
+void mainGame::playerCollision(Sprite* player1, Sprite* player2, int dir) {
+	// 0 = left		1 = right
+	playerState state1 = player1->getState();
+	playerState state2 = player2->getState();
+
+	if (dir == 1) {
+		switch (state1){
+		case playerState::PUNCHR:
+			if (state2 != playerState::BLOCKR || state2 != playerState::CROUCHL || state2 != playerState::CROUCHR) {
+				std::cout << "PUNCHED" << std::endl;
+			}
+			break;
+		case playerState::LOWKR:
+			if (state2 != playerState::JUMPR || state2 != playerState::JUMPL || state2 != playerState::HIGHKR || state2 != playerState::HIGHKL) {
+				std::cout << "LOW KICKED" << std::endl;
+			}
+			break;
+		case playerState::HIGHKR:
+			if (state2 != playerState::CROUCHR || state2 != playerState::CROUCHL || state2 != playerState::LOWKR || state2 != playerState::LOWKL) {
+				std::cout << "HIGH KICKED" << std::endl;
+			}
+			break;
+
+
+		default:
+			break;
+		}
+	}
+	else {
+		switch (state1){
+		case playerState::PUNCHL:
+			if (state2 != playerState::BLOCKL || state2 != playerState::CROUCHL || state2 != playerState::CROUCHR) {
+				std::cout << "PUNCHED" << std::endl;
+			}
+			break;
+		case playerState::LOWKL:
+			if (state2 != playerState::JUMPR || state2 != playerState::JUMPL || state2 != playerState::HIGHKR || state2 != playerState::HIGHKL) {
+				std::cout << "LOW KICKED" << std::endl;
+			}
+			break;
+		case playerState::HIGHKL:
+			if (state2 != playerState::CROUCHR || state2 != playerState::CROUCHL || state2 != playerState::LOWKR || state2 != playerState::LOWKL) {
+				std::cout << "HIGH KICKED" << std::endl;
+			}
+			break;
+
+
+		default:
+			break;
+		}
+	}
 }
 
 void mainGame::platformGenerator() {

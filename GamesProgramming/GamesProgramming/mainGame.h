@@ -26,7 +26,7 @@ private:
 	void gameLoop();
 	void processInput();
 	void collisionDetection(Sprite* player);
-	void moderateFPS();
+	void playerCollision(Sprite* player1, Sprite* player2, int dir);
 	void platformGenerator();
 	void moveScene();
 	void setScale(Sprite* player);
