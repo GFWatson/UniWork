@@ -33,6 +33,8 @@ void Sprite::init(float x, float y, float width, float height, GLTexture tex, pl
 	_transformX = x;
 	_transformY = y;
 
+	_hitTime = 0.0f;
+
 	_texture = tex;
 
 	_state = state;
@@ -259,6 +261,18 @@ void Sprite::setState(playerState state) {
 
 playerState Sprite::getState() {
 	return _state;
+}
+
+float Sprite::getHit(){
+	return _hitTime;
+}
+
+void Sprite::increaseHit(){
+	_hitTime++;
+}
+
+void Sprite::resetHit() {
+	_hitTime = 0.0f;
 }
 
 void Sprite::draw() {

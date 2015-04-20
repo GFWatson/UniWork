@@ -26,6 +26,9 @@ public:
 	glm::mat4 getModel();
 	void setState(playerState state);
 	playerState getState();
+	float getHit();
+	void increaseHit();
+	void resetHit();
 	void draw();
 	bool offScreenLeft();
 
@@ -41,6 +44,8 @@ private:
 	float _scaleY;
 	float _transformX;
 	float _transformY;
+
+	float _hitTime;
 
 	float _colPoints[10][2];
 

@@ -55,8 +55,8 @@ void mainGame::run()
 
 	_texture = _defaultTexture;
 	
-	_playerOne.init(50.0f, 50.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
-	_playerTwo.init(400.0f, 50.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+	_playerOne.init(250.0f, 1000.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+	_playerTwo.init(600.0f, 1000.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
 
 	_floor.init(0.0f, 0.0f, 1024.0f, 20.0f, _defaultTexture, playerState::ENVIR);
 	
@@ -125,6 +125,8 @@ void mainGame::initSystems()
 		fatalError("SDL Window could not be created!");
 	}
 
+	//SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+
 	// create context
 	SDL_GLContext glContext = SDL_GL_CreateContext(_window);
 	if (glContext == nullptr) {
@@ -183,7 +185,7 @@ void mainGame::gameLoop()
 		_playerOne.set(_deltaTime, _oneSpeedX, _oneSpeedY);
 		_playerTwo.set(_deltaTime, _twoSpeedX, _twoSpeedY);
 		platformGenerator();
-		//moveScene();
+		moveScene();
 		collisionDetection(&_playerOne);
 		collisionDetection(&_playerTwo);
 		drawGame();
@@ -400,7 +402,11 @@ void mainGame::processInput()
 		// for jumping, crouching and sliding
 		case SDL_KEYDOWN:
 			switch (evnt.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				_state = gameState::EXIT;
+				break;
 			case SDLK_w:
+				//Push this to a function taking the player as input
 				if (_playerOne.getState() == playerState::STANDR || _playerOne.getState() == playerState::RUNR){
 					_oneSpeedY = _jumpSpeed;
 					_playerOne.setState(playerState::JUMPR);
@@ -427,12 +433,6 @@ void mainGame::processInput()
 					_playerOne.setState(playerState::LOWKR);
 					_playerOne.setTexture(_slidingRightTexture);
 
-					_oneSlideTime += 0.1f;
-					if (_oneSlideTime >= 5.0f) {
-						_playerOne.setState(playerState::STANDR);
-						_playerOne.setTexture(_standingTexture);
-					}
-
 					break;
 				case playerState::RUNL:
 					_oneMoveRequest = false;
@@ -441,19 +441,22 @@ void mainGame::processInput()
 
 					_oneSlideTime += 0.1f;
 					if (_oneSlideTime >= 5.0f) {
-						_playerOne.setState(playerState::STANDR);
+ 						_playerOne.setState(playerState::STANDR);
 						_playerOne.setTexture(_standingTexture);
 					}
 					break;
 
 				default:
+//					std::cout << "Hit default on state case" << std::endl;
 					break;
 				}
 				break;
 
 			default:
+				//std::cout << "Hit default on key case" << std::endl;
 				break;
 			}
+
 			break;
 
 		// keyboard up includes horizontal movement
@@ -513,7 +516,7 @@ void mainGame::processInput()
 
 		case SDL_CONTROLLERBUTTONDOWN:
 			if (evnt.cbutton.button == SDL_CONTROLLER_BUTTON_A && evnt.cbutton.state == SDL_PRESSED) {
-				if (_playerTwo.getState() == playerState::STANDR || _playerTwo.getState() == playerState::RUNR){
+					if (_playerTwo.getState() == playerState::STANDR || _playerTwo.getState() == playerState::RUNR){
 					_twoSpeedY = _jumpSpeed;
 					_playerTwo.setState(playerState::JUMPR);
 					_playerTwo.setTexture(_jumpingRightTexture);
@@ -523,6 +526,8 @@ void mainGame::processInput()
 					_playerTwo.setState(playerState::JUMPL);
 					_playerTwo.setTexture(_jumpingLeftTexture);
 				}
+
+
 			}
 			
 			if (evnt.cbutton.button == SDL_CONTROLLER_BUTTON_B && evnt.cbutton.state == SDL_PRESSED) {
@@ -681,6 +686,27 @@ void mainGame::processInput()
 				break;
 
 			case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+				if (evnt.caxis.value > 100) {
+					if (_playerTwo.getState() == playerState::STANDR){
+						_playerTwo.setState(playerState::BLOCKR);
+						_playerTwo.setTexture(_blockingRightTexture);
+					}
+					else if (_playerTwo.getState() == playerState::STANDL){
+						_playerTwo.setState(playerState::BLOCKL);
+						_playerTwo.setTexture(_blockingLeftTexture);
+					}
+				}
+				else {
+					if (_playerTwo.getState() == playerState::BLOCKR){
+						_playerTwo.setState(playerState::STANDR);
+						_playerTwo.setTexture(_standingTexture);
+					}
+					else if (_playerTwo.getState() == playerState::BLOCKL){
+						_playerTwo.setState(playerState::STANDL);
+						_playerTwo.setTexture(_standingTexture);
+					}
+
+				}
 				break;
 
 			default:
@@ -724,7 +750,17 @@ void mainGame::processInput()
 		else if (_oneSpeedX < -2.0f) {
 			_oneSpeedX += _decX;
 		} // deccelerate slower if sliding
+
+	}
 	else if (_playerOne.getState() == playerState::LOWKR || _playerOne.getState() == playerState::LOWKL) {
+		
+		_oneSlideTime += 0.1f;
+
+		if (_oneSlideTime >= 5.0f) {
+			_playerOne.setState(playerState::STANDR);
+			_playerOne.setTexture(_standingTexture);
+		}
+		
 		if (_oneSpeedX > 2.0f) {
 			_oneSpeedX -= (0.05f * _maxFPS);
 		}
@@ -750,7 +786,6 @@ void mainGame::processInput()
 			_twoSpeedX += (0.05f * _maxFPS);
 		}
 	}
-	}
 }
 
 void mainGame::collisionDetection(Sprite* player) {
@@ -762,7 +797,9 @@ void mainGame::collisionDetection(Sprite* player) {
 	for (int i = 0; i < _sceneList.size(); i++) {
 		
 		_sceneList[i]->get(&x2, &y2, &width2, &height2);
-
+		if (_sceneList[i]->getState() == playerState::HITR || _sceneList[i]->getState() == playerState::HITL){
+			continue;
+		}
 		// if it's not the same object
 		if (x == x2 && y == y2 && width == width2 && height == height2) {
 			continue;
@@ -781,11 +818,31 @@ void mainGame::collisionDetection(Sprite* player) {
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
 				// move back
 				
-				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HIT) {
+				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HITR && _sceneList[i]->getState() != playerState::HITL) {
 					continue;
 				}
 				
 				player->set(1000.0f, 0.0f, (height2 - y));
+				// laid on floor
+				if (player->getState() == playerState::HITR && player->getHit() < 15) {
+					player->setTexture(_slidingLeftTexture);
+					player->increaseHit();
+				}
+				else if (player->getState() == playerState::HITL && player->getHit() < 15) {
+					player->setTexture(_slidingRightTexture);
+					player->increaseHit();
+				}
+				if (player->getState() == playerState::HITR && player->getHit() >= 15) {
+					player->setState(playerState::STANDR);
+					player->setTexture(_standingTexture);
+					player->resetHit();
+				}
+				else if (player->getState() == playerState::HITL && player->getHit() >= 15) {
+					player->setState(playerState::STANDL);
+					player->setTexture(_standingTexture);
+					player->resetHit();
+				}
+
 				// allow jumping again
 				if (player->getState() == playerState::JUMPR || player->getState() == playerState::HIGHKR) {
 					player->setState(playerState::STANDR);
@@ -802,7 +859,7 @@ void mainGame::collisionDetection(Sprite* player) {
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2))) {
 				// move back
 				
-				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HIT) {
+				if (_sceneList[i]->getState() != playerState::ENVIR && _sceneList[i]->getState() != playerState::SCORE && _sceneList[i]->getState() != playerState::HITR && _sceneList[i]->getState() != playerState::HITL) {
 					continue;
 				}
 				
@@ -813,7 +870,7 @@ void mainGame::collisionDetection(Sprite* player) {
 			// left
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2)) || ((e >= x2 && e <= width2) && (f >= y2 && f <= height2))) {
 				// move back
-				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HIT) {
+				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HITR && _sceneList[i]->getState() != playerState::HITL) {
 					playerCollision(player, _sceneList[i], 0);
 					continue;
 				}
@@ -824,11 +881,11 @@ void mainGame::collisionDetection(Sprite* player) {
 			// right
 			if (((a >= x2 && a <= width2) && (b >= y2 && b <= height2)) || ((c >= x2 && c <= width2) && (d >= y2 && d <= height2)) || ((e >= x2 && e <= width2) && (f >= y2 && f <= height2))) {
 				// move back
-				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HIT) {
+				if (_sceneList[i]->getState() != playerState::ENVIR || _sceneList[i]->getState() != playerState::SCORE || _sceneList[i]->getState() != playerState::HITR && _sceneList[i]->getState() != playerState::HITL) {
 					playerCollision(player, _sceneList[i], 1);
 					continue;
 				}
-				player->set(1000.0f, (x2 - width + 2.0f), 0.0f);
+				player->set(1000.0f, (x2 - width), 0.0f);
 			}
 		}
 				
@@ -843,24 +900,30 @@ void mainGame::collisionDetection(Sprite* player) {
 
 void mainGame::playerCollision(Sprite* player1, Sprite* player2, int dir) {
 	// 0 = left		1 = right
-	playerState state1 = player1->getState();
-	playerState state2 = player2->getState();
+	
 
 	if (dir == 1) {
-		switch (state1){
+		switch (player1->getState()){
 		case playerState::PUNCHR:
-			if (state2 != playerState::BLOCKR || state2 != playerState::CROUCHL || state2 != playerState::CROUCHR) {
-				std::cout << "PUNCHED" << std::endl;
+			if (player2->getState() != playerState::BLOCKL || player2->getState() != playerState::CROUCHL || player2->getState() != playerState::CROUCHR) {
+				_twoSpeedX = 2000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITR);
+
 			}
 			break;
 		case playerState::LOWKR:
-			if (state2 != playerState::JUMPR || state2 != playerState::JUMPL || state2 != playerState::HIGHKR || state2 != playerState::HIGHKL) {
-				std::cout << "LOW KICKED" << std::endl;
+			if (player2->getState() != playerState::JUMPR || player2->getState() != playerState::JUMPL || player2->getState() != playerState::HIGHKR || player2->getState() != playerState::HIGHKL) {
+				_twoSpeedX = 2000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITR);
 			}
 			break;
 		case playerState::HIGHKR:
-			if (state2 != playerState::CROUCHR || state2 != playerState::CROUCHL || state2 != playerState::LOWKR || state2 != playerState::LOWKL) {
-				std::cout << "HIGH KICKED" << std::endl;
+			if (player2->getState() != playerState::CROUCHR || player2->getState() != playerState::CROUCHL || player2->getState() != playerState::LOWKR || player2->getState() != playerState::LOWKL) {
+				_twoSpeedX = 1000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITR);
 			}
 			break;
 
@@ -870,20 +933,26 @@ void mainGame::playerCollision(Sprite* player1, Sprite* player2, int dir) {
 		}
 	}
 	else {
-		switch (state1){
+		switch (player1->getState()){
 		case playerState::PUNCHL:
-			if (state2 != playerState::BLOCKL || state2 != playerState::CROUCHL || state2 != playerState::CROUCHR) {
-				std::cout << "PUNCHED" << std::endl;
+			if (player2->getState() != playerState::BLOCKR || player2->getState() != playerState::CROUCHL || player2->getState() != playerState::CROUCHR) {
+				_twoSpeedX = -2000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITL);
 			}
 			break;
 		case playerState::LOWKL:
-			if (state2 != playerState::JUMPR || state2 != playerState::JUMPL || state2 != playerState::HIGHKR || state2 != playerState::HIGHKL) {
-				std::cout << "LOW KICKED" << std::endl;
+			if (player2->getState() != playerState::JUMPR || player2->getState() != playerState::JUMPL || player2->getState() != playerState::HIGHKR || player2->getState() != playerState::HIGHKL) {
+				_twoSpeedX = -2000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITL);
 			}
 			break;
 		case playerState::HIGHKL:
-			if (state2 != playerState::CROUCHR || state2 != playerState::CROUCHL || state2 != playerState::LOWKR || state2 != playerState::LOWKL) {
-				std::cout << "HIGH KICKED" << std::endl;
+			if (player2->getState() != playerState::CROUCHR || player2->getState() != playerState::CROUCHL || player2->getState() != playerState::LOWKR || player2->getState() != playerState::LOWKL) {
+				_twoSpeedX = -2000.0f;
+				_twoSpeedY = _jumpSpeed;
+				player2->setState(playerState::HITL);
 			}
 			break;
 
@@ -1011,12 +1080,13 @@ void mainGame::moveScene() {
 	_p21.set(_deltaTime, -50.0f, 0.0f);
 
 	_playerOne.set(_deltaTime, -50.0f, 0.0f);
+	_playerTwo.set(_deltaTime, -50.0f, 0.0f);
 }
 
 void mainGame::setScale(Sprite* player) {
 	if (player->getState() == playerState::CROUCHL || player->getState() == playerState::CROUCHR)
 		player->setScale(1.0f, 0.5f);
-	else if (player->getState() == playerState::HIGHKL || player->getState() == playerState::HIGHKR || player->getState() == playerState::LOWKL || player->getState() == playerState::LOWKR)
+	else if (player->getState() == playerState::HIGHKL || player->getState() == playerState::HIGHKR || player->getState() == playerState::LOWKL || player->getState() == playerState::LOWKR || player->getState() == playerState::HITR || player->getState() == playerState::HITL)
 		player->setScale(2.0f, 0.5f);
 	else
 		player->setScale(1.0f, 1.0f);
