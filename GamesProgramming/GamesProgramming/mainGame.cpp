@@ -52,14 +52,34 @@ void mainGame::run()
 	_slidingLeftTexture = imageLoader::loadPNG("Textures/StickmanSlideLeft.png");
 	_kickingRightTexture = imageLoader::loadPNG("Textures/StickmanKickRight.png");
 	_kickingLeftTexture = imageLoader::loadPNG("Textures/StickmanKickLeft.png");
+	_mainMenuTexture = imageLoader::loadPNG("Textures/Menu.png");
+	_score10Texture = imageLoader::loadPNG("Textures/One0.png");
+	_score11Texture = imageLoader::loadPNG("Textures/One1.png");
+	_score12Texture = imageLoader::loadPNG("Textures/One2.png");
+	_score13Texture = imageLoader::loadPNG("Textures/One3.png");
+	_score20Texture = imageLoader::loadPNG("Textures/Two0.png");
+	_score21Texture = imageLoader::loadPNG("Textures/Two1.png");
+	_score22Texture = imageLoader::loadPNG("Textures/Two2.png");
+	_score23Texture = imageLoader::loadPNG("Textures/Two3.png");
 
 	_texture = _defaultTexture;
 	
-	_playerOne.init(250.0f, 1000.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
-	_playerTwo.init(600.0f, 1000.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+	
+	initGame();
+
+	gameLoop();
+		
+}
+
+void mainGame::initGame(){
+	_playerOne.init(250.0f, 600.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+	_playerTwo.init(600.0f, 600.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+
+	_oneScore.init(350.0f, 650.0f, 75.0f, 75.0f, _score10Texture, playerState::SCORE);
+	_twoScore.init(600.0f, 650.0f, 75.0f, 75.0f, _score20Texture, playerState::SCORE);
 
 	_floor.init(0.0f, 0.0f, 1024.0f, 20.0f, _defaultTexture, playerState::ENVIR);
-	
+
 	_p1.init(-150.0f, 65.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
 	_p2.init(-150.0f, 65.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
 	_p3.init(-150.0f, 65.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
@@ -81,12 +101,15 @@ void mainGame::run()
 	_p19.init(-150.0f, 595.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
 	_p20.init(-150.0f, 595.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
 	_p21.init(-150.0f, 595.0f, 150.0f, 20.0f, _defaultTexture, playerState::ENVIR);
-	
+
 	_sceneList.push_back(&_playerOne);
 	_sceneList.push_back(&_playerTwo);
 
+	_sceneList.push_back(&_oneScore);
+	_sceneList.push_back(&_twoScore);
+
 	_sceneList.push_back(&_floor);
-	
+
 	_sceneList.push_back(&_p1);
 	_sceneList.push_back(&_p2);
 	_sceneList.push_back(&_p3);
@@ -108,10 +131,6 @@ void mainGame::run()
 	_sceneList.push_back(&_p19);
 	_sceneList.push_back(&_p20);
 	_sceneList.push_back(&_p21);
-		
-
-	gameLoop();
-		
 }
 
 void mainGame::initSystems()
@@ -136,7 +155,7 @@ void mainGame::initSystems()
 	//Check for joysticks
 	if (SDL_NumJoysticks() < 1)
 	{
-		printf("Warning: No joysticks connected!\n");
+		std::cout << "Warning: No joysticks connected!" << std::endl;
 	}
 	else
 	{

@@ -21,6 +21,7 @@ public:
 	void run();
 
 private:
+	void initGame();
 	void initSystems();
 	void initShaders();
 	void gameLoop();
@@ -53,15 +54,19 @@ private:
 
 	SDL_GameController* _controller1;
 
+	Sprite _mainMenu;
+
 	Sprite _playerOne;
 	float _oneRunTime, _oneAttackTime, _oneSlideTime;
 	float _oneSpeedX, _oneSpeedY;
 	bool _oneMoveRequest;
+	Sprite _oneScore;
 
 	Sprite _playerTwo;
 	float _twoRunTime, _twoAttackTime, _twoSlideTime;
 	float _twoSpeedX, _twoSpeedY;
 	bool _twoMoveRequest;
+	Sprite _twoScore;
 
 	Sprite _floor;
 
@@ -92,6 +97,15 @@ private:
 	GLTexture _slidingLeftTexture;
 	GLTexture _kickingRightTexture;
 	GLTexture _kickingLeftTexture;
+	GLTexture _mainMenuTexture;
+	GLTexture _score10Texture;
+	GLTexture _score11Texture;
+	GLTexture _score12Texture;
+	GLTexture _score13Texture;
+	GLTexture _score20Texture;
+	GLTexture _score21Texture;
+	GLTexture _score22Texture;
+	GLTexture _score23Texture;
 
 	GLTexture _texture;
 };
