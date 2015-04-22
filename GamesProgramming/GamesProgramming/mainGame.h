@@ -24,6 +24,7 @@ private:
 	void initGame();
 	void initSystems();
 	void initShaders();
+	void menuLoop();
 	void gameLoop();
 	void processInput();
 	void collisionDetection(Sprite* player);
@@ -31,6 +32,10 @@ private:
 	void platformGenerator();
 	void moveScene();
 	void setScale(Sprite* player);
+	void checkPoint();
+	void scoreTex();
+	void checkWin();
+	void resetGame();
 	void drawGame();
 
 	SDL_Window* _window;
@@ -55,18 +60,23 @@ private:
 	SDL_GameController* _controller1;
 
 	Sprite _mainMenu;
+	gameState _menuState;
+
+	Sprite _win;
 
 	Sprite _playerOne;
-	float _oneRunTime, _oneAttackTime, _oneSlideTime;
+	float _oneRunTime, _oneSlideTime;
 	float _oneSpeedX, _oneSpeedY;
 	bool _oneMoveRequest;
 	Sprite _oneScore;
+	int _one;
 
 	Sprite _playerTwo;
-	float _twoRunTime, _twoAttackTime, _twoSlideTime;
+	float _twoRunTime, _twoSlideTime;
 	float _twoSpeedX, _twoSpeedY;
 	bool _twoMoveRequest;
 	Sprite _twoScore;
+	int _two;
 
 	Sprite _floor;
 
@@ -106,6 +116,8 @@ private:
 	GLTexture _score21Texture;
 	GLTexture _score22Texture;
 	GLTexture _score23Texture;
+	GLTexture _oneWinTexture;
+	GLTexture _twoWinTexture;
 
 	GLTexture _texture;
 };

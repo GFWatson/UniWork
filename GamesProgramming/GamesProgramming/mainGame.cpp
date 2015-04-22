@@ -15,9 +15,9 @@ _window(nullptr),
 _fps(0.0f), _maxFPS(60.0f), _currentTime(0.0f), _prevTime(0.0f), _deltaTime(0.0f),
 _accX(0.2f * _maxFPS), _decX(0.3f * _maxFPS), _accY(-0.5f * _maxFPS), _maxSpeedX(5.0f * _maxFPS), _maxSpeedY(-10.0f * _maxFPS), _jumpSpeed(10.0f * _maxFPS),
 _round(1),
-_state(gameState::PLAY),
-_oneRunTime(0.0f), _oneAttackTime(0.0f), _oneSlideTime(0.0f), _oneSpeedX(0.0f), _oneSpeedY(0.0f), _oneMoveRequest(false),
-_twoRunTime(0.0f), _twoAttackTime(0.0f), _twoSlideTime(0.0f), _twoSpeedX(0.0f), _twoSpeedY(0.0f), _twoMoveRequest(false),
+_state(gameState::PLAY), _menuState(gameState::PLAY),
+_oneRunTime(0.0f), _oneSlideTime(0.0f), _oneSpeedX(0.0f), _oneSpeedY(0.0f), _oneMoveRequest(false), _one(0),
+_twoRunTime(0.0f), _twoSlideTime(0.0f), _twoSpeedX(0.0f), _twoSpeedY(0.0f), _twoMoveRequest(false), _two(0),
 _pTime(4000.0f), _lTime1(0.0f), _lTime2(0.0f), _lTime3(0.0f), _lTime4(0.0f), _lTime5(0.0f), _lTime6(0.0f), _lTime7(0.0f), _l1(0.0f), _l2(0.0f), _l3(0.0f), _l4(0.0f), _l5(0.0f), _l6(0.0f), _l7(0.0f)
 {
 	_camera.init(_screenWidth, _screenHeight);
@@ -61,18 +61,21 @@ void mainGame::run()
 	_score21Texture = imageLoader::loadPNG("Textures/Two1.png");
 	_score22Texture = imageLoader::loadPNG("Textures/Two2.png");
 	_score23Texture = imageLoader::loadPNG("Textures/Two3.png");
+	_oneWinTexture = imageLoader::loadPNG("Textures/Win1.png");
+	_twoWinTexture = imageLoader::loadPNG("Textures/Win2.png");
 
 	_texture = _defaultTexture;
 	
+	_mainMenu.init(0.0f, 0.0f, _screenWidth, _screenHeight, _mainMenuTexture, playerState::SCORE);
 	
 	initGame();
 
-	gameLoop();
+	menuLoop();
 		
 }
 
 void mainGame::initGame(){
-	_playerOne.init(250.0f, 600.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
+	_playerOne.init(400.0f, 600.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
 	_playerTwo.init(600.0f, 600.0f, 48.0f, 64.0f, _standingTexture, playerState::STANDR);
 
 	_oneScore.init(350.0f, 650.0f, 75.0f, 75.0f, _score10Texture, playerState::SCORE);
@@ -144,7 +147,8 @@ void mainGame::initSystems()
 		fatalError("SDL Window could not be created!");
 	}
 
-	//SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+	SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	// create context
 	SDL_GLContext glContext = SDL_GL_CreateContext(_window);
@@ -193,6 +197,67 @@ void mainGame::initShaders() {
 	_mLocation = _colourProgram.getUniformLocation("M");
 }
 
+void mainGame::menuLoop(){
+	while (_menuState != gameState::EXIT){
+		bool play = false;
+		//process input
+		SDL_Event evnt;
+		while (SDL_PollEvent(&evnt)){
+			switch (evnt.type){
+			case SDL_KEYDOWN:
+				switch (evnt.key.keysym.sym) {
+				case SDLK_SPACE:
+					play = true;
+					break;
+
+				case SDLK_ESCAPE:
+					_menuState = gameState::EXIT;
+					break;
+
+				default:
+					break;
+				}
+
+			default:
+				break;
+			}
+		}
+
+		// game if space
+		if (play){
+			gameLoop();
+		}
+
+		// reset everything
+		play = false;
+		resetGame();
+
+		// draw
+		glClearDepth(1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		_colourProgram.use();
+		glActiveTexture(GL_TEXTURE0);
+		GLint textureLocation = _colourProgram.getUniformLocation("mySampler");
+		glUniform1i(textureLocation, 0);
+
+		glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+		glUniformMatrix4fv(_pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
+
+		_mMatrix = _mainMenu.getModel();
+		glUniformMatrix4fv(_mLocation, 1, GL_FALSE, &(_mMatrix[0][0]));
+		_texture = _mainMenu.getTexture();
+		glBindTexture(GL_TEXTURE_2D, _texture.id);
+		_mainMenu.draw();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		_colourProgram.unuse();
+
+		SDL_GL_SwapWindow(_window);
+	}
+}
+
 void mainGame::gameLoop()
 {
 	while (_state != gameState::EXIT){
@@ -209,7 +274,9 @@ void mainGame::gameLoop()
 		collisionDetection(&_playerTwo);
 		drawGame();
 		_prevTime = _currentTime;
-
+		checkPoint();
+		scoreTex();
+		checkWin();
 	}
 }
 
@@ -816,7 +883,8 @@ void mainGame::collisionDetection(Sprite* player) {
 	for (int i = 0; i < _sceneList.size(); i++) {
 		
 		_sceneList[i]->get(&x2, &y2, &width2, &height2);
-		if (_sceneList[i]->getState() == playerState::HITR || _sceneList[i]->getState() == playerState::HITL){
+		// cant collide if hit or HUD
+		if (_sceneList[i]->getState() == playerState::HITR || _sceneList[i]->getState() == playerState::HITL || _sceneList[i]->getState() == playerState::SCORE){
 			continue;
 		}
 		// if it's not the same object
@@ -1076,30 +1144,30 @@ void mainGame::platformGenerator() {
 }
 
 void mainGame::moveScene() {
-	_p1.set(_deltaTime, -50.0f, 0.0f);
-	_p2.set(_deltaTime, -50.0f, 0.0f);
-	_p3.set(_deltaTime, -50.0f, 0.0f);
-	_p4.set(_deltaTime, -50.0f, 0.0f);
-	_p5.set(_deltaTime, -50.0f, 0.0f);
-	_p6.set(_deltaTime, -50.0f, 0.0f);
-	_p7.set(_deltaTime, -50.0f, 0.0f);
-	_p8.set(_deltaTime, -50.0f, 0.0f);
-	_p9.set(_deltaTime, -50.0f, 0.0f);
-	_p10.set(_deltaTime, -50.0f, 0.0f);
-	_p11.set(_deltaTime, -50.0f, 0.0f);
-	_p12.set(_deltaTime, -50.0f, 0.0f);
-	_p13.set(_deltaTime, -50.0f, 0.0f);
-	_p14.set(_deltaTime, -50.0f, 0.0f);
-	_p15.set(_deltaTime, -50.0f, 0.0f);
-	_p16.set(_deltaTime, -50.0f, 0.0f);
-	_p17.set(_deltaTime, -50.0f, 0.0f);
-	_p18.set(_deltaTime, -50.0f, 0.0f);
-	_p19.set(_deltaTime, -50.0f, 0.0f);
-	_p20.set(_deltaTime, -50.0f, 0.0f);
-	_p21.set(_deltaTime, -50.0f, 0.0f);
+	_p1.set(_deltaTime, -100.0f, 0.0f);
+	_p2.set(_deltaTime, -100.0f, 0.0f);
+	_p3.set(_deltaTime, -100.0f, 0.0f);
+	_p4.set(_deltaTime, -100.0f, 0.0f);
+	_p5.set(_deltaTime, -100.0f, 0.0f);
+	_p6.set(_deltaTime, -100.0f, 0.0f);
+	_p7.set(_deltaTime, -100.0f, 0.0f);
+	_p8.set(_deltaTime, -100.0f, 0.0f);
+	_p9.set(_deltaTime, -100.0f, 0.0f);
+	_p10.set(_deltaTime, -100.0f, 0.0f);
+	_p11.set(_deltaTime, -100.0f, 0.0f);
+	_p12.set(_deltaTime, -100.0f, 0.0f);
+	_p13.set(_deltaTime, -100.0f, 0.0f);
+	_p14.set(_deltaTime, -100.0f, 0.0f);
+	_p15.set(_deltaTime, -100.0f, 0.0f);
+	_p16.set(_deltaTime, -100.0f, 0.0f);
+	_p17.set(_deltaTime, -100.0f, 0.0f);
+	_p18.set(_deltaTime, -100.0f, 0.0f);
+	_p19.set(_deltaTime, -100.0f, 0.0f);
+	_p20.set(_deltaTime, -100.0f, 0.0f);
+	_p21.set(_deltaTime, -100.0f, 0.0f);
 
-	_playerOne.set(_deltaTime, -50.0f, 0.0f);
-	_playerTwo.set(_deltaTime, -50.0f, 0.0f);
+	_playerOne.set(_deltaTime, -100.0f, 0.0f);
+	_playerTwo.set(_deltaTime, -100.0f, 0.0f);
 }
 
 void mainGame::setScale(Sprite* player) {
@@ -1112,6 +1180,146 @@ void mainGame::setScale(Sprite* player) {
 
 }
 
+void mainGame::checkPoint(){
+	if (_playerOne.offScreenLeft()){
+		_two++;
+		// reset players
+		_playerOne.setPos(400.0f, 600.0f);
+		_playerTwo.setPos(600.0f, 600.0f);
+	}
+	else if (_playerTwo.offScreenLeft()){
+		_one++;
+		// reset players
+		_playerOne.setPos(400.0f, 600.0f);
+		_playerTwo.setPos(600.0f, 600.0f);
+	}
+}
+
+void mainGame::scoreTex(){
+	switch (_two){
+	case 0:
+		_twoScore.setTexture(_score10Texture);
+		break;
+	case 1:
+		_twoScore.setTexture(_score11Texture);
+		break;
+	case 2:
+		_twoScore.setTexture(_score12Texture);
+		break;
+	case 3:
+		_twoScore.setTexture(_score13Texture);
+		break;
+
+	default:
+		_twoScore.setTexture(_score10Texture);
+		break;
+	}
+
+	switch (_one){
+	case 0:
+		_oneScore.setTexture(_score20Texture);
+		break;
+	case 1:
+		_oneScore.setTexture(_score21Texture);
+		break;
+	case 2:
+		_oneScore.setTexture(_score22Texture);
+		break;
+	case 3:
+		_oneScore.setTexture(_score23Texture);
+		break;
+
+	default:
+		_oneScore.setTexture(_score20Texture);
+		break;
+	}
+}
+
+void mainGame::checkWin(){
+	if (_two == 3){
+		// show win screen
+		_win.init(0.0f, 0.0f, _screenWidth, _screenHeight, _twoWinTexture, playerState::SCORE);
+		
+		// wait
+		float time = 0.0f;
+		while (time < 10000.0f){
+			_currentTime = SDL_GetTicks();
+			_deltaTime = _currentTime - _prevTime;
+			time += _deltaTime;
+			glClearDepth(1.0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			_colourProgram.use();
+			glActiveTexture(GL_TEXTURE0);
+			GLint textureLocation = _colourProgram.getUniformLocation("mySampler");
+			glUniform1i(textureLocation, 0);
+
+			glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+			glUniformMatrix4fv(_pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
+
+			_mMatrix = _win.getModel();
+			glUniformMatrix4fv(_mLocation, 1, GL_FALSE, &(_mMatrix[0][0]));
+			_texture = _win.getTexture();
+			glBindTexture(GL_TEXTURE_2D, _texture.id);
+			_win.draw();
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			_colourProgram.unuse();
+
+			SDL_GL_SwapWindow(_window);
+			_prevTime = _currentTime;
+		}
+		// exit to menu
+		_state = gameState::EXIT;
+	}
+	else if (_one == 3){
+		// show win screen
+		_win.init(0.0f, 0.0f, _screenWidth, _screenHeight, _oneWinTexture, playerState::SCORE);
+		
+		// wait
+		float time = 0.0f;
+		while (time < 10000.0f){
+			_currentTime = SDL_GetTicks();
+			_deltaTime = _currentTime - _prevTime;
+			time += _deltaTime;
+			glClearDepth(1.0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			_colourProgram.use();
+			glActiveTexture(GL_TEXTURE0);
+			GLint textureLocation = _colourProgram.getUniformLocation("mySampler");
+			glUniform1i(textureLocation, 0);
+
+			glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+			glUniformMatrix4fv(_pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
+
+			_mMatrix = _win.getModel();
+			glUniformMatrix4fv(_mLocation, 1, GL_FALSE, &(_mMatrix[0][0]));
+			_texture = _win.getTexture();
+			glBindTexture(GL_TEXTURE_2D, _texture.id);
+			_win.draw();
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			_colourProgram.unuse();
+
+			SDL_GL_SwapWindow(_window);
+			_prevTime = _currentTime;
+		}
+		// exit to menu
+		_state = gameState::EXIT;
+	}
+}
+
+void mainGame::resetGame(){
+	_state = gameState::PLAY;
+	_oneRunTime = 0.0f; _oneSlideTime = 0.0f; _oneSpeedX = 0.0f; _oneSpeedY = 0.0f; _oneMoveRequest = false; _one = 0;
+	_twoRunTime = 0.0f; _twoSlideTime = 0.0f; _twoSpeedX = 0.0f; _twoSpeedY = 0.0f; _twoMoveRequest = false; _two = 0;
+	_playerOne.setPos(400.0f, 600.0f);
+	_playerTwo.setPos(600.0f, 600.0f);
+}
+
 void mainGame::drawGame() {
 
 	glClearDepth(1.0);
@@ -1121,9 +1329,6 @@ void mainGame::drawGame() {
 	glActiveTexture(GL_TEXTURE0);
 	GLint textureLocation = _colourProgram.getUniformLocation("mySampler");
 	glUniform1i(textureLocation, 0);
-
-	//GLint timeLocation = _colourProgram.getUniformLocation("time");
-	//glUniform1f(timeLocation, _time);
 
 	glm::mat4 cameraMatrix = _camera.getCameraMatrix();
 	glUniformMatrix4fv(_pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
