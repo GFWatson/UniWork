@@ -1,9 +1,31 @@
-﻿Build started 22/04/2015 20:24:58.
-     1>Project "F:\UniWork\GamesProgramming\GamesProgramming\GamesProgramming.vcxproj" on node 2 (Build target(s)).
-     1>Link:
-         GamesProgramming.vcxproj -> F:\UniWork\GamesProgramming\Debug\GamesProgramming.exe
-     1>Done Building Project "F:\UniWork\GamesProgramming\GamesProgramming\GamesProgramming.vcxproj" (Build target(s)).
+﻿Build started 29/12/2015 15:58:11.
+     1>Project "C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\GamesProgramming\GamesProgramming.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt mainGame.cpp
+         mainGame.cpp
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(69): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(264): warning C4244: '=': conversion from 'Uint32' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(883): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1062): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1063): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1241): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1246): warning C4244: '=': conversion from 'Uint32' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1278): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1283): warning C4244: '=': conversion from 'Uint32' to 'float', possible loss of data
+     1>c:\users\gabri\documents\github\uniwork\gamesprogramming\gamesprogramming\maingame.cpp(1336): warning C4018: '<': signed/unsigned mismatch
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\Debug\GamesProgramming.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\deps/lib/ SDL2.lib SDL2main.lib opengl32.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\Debug\GamesProgramming.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\Debug\GamesProgramming.lib" /MACHINE:X86 Debug\Camera.obj
+         Debug\Errors.obj
+         Debug\GLSLProgram.obj
+         Debug\imageLoader.obj
+         Debug\IOManager.obj
+         Debug\main.obj
+         Debug\mainGame.obj
+         Debug\picoPNG.obj
+         Debug\Sprite.obj
+         GamesProgramming.vcxproj -> C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\Debug\GamesProgramming.exe
+     1>Done Building Project "C:\Users\gabri\Documents\GitHub\UniWork\GamesProgramming\GamesProgramming\GamesProgramming.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.33
+Time Elapsed 00:00:01.58

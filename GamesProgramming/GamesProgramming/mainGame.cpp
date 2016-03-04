@@ -147,7 +147,7 @@ void mainGame::initSystems()
 		fatalError("SDL Window could not be created!");
 	}
 
-	SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
+	//SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
 	SDL_ShowCursor(SDL_DISABLE);
 
 	// create context

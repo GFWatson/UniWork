@@ -1,0 +1,55 @@
+﻿Build started 07/01/2016 11:59:38.
+     1>Project "C:\Users\gabri\Desktop\GameEngine2\GameEngine2\GameEngine2.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Camera.cpp dataArray.cpp GLSLProgram.cpp imageLoader.cpp IOManager.cpp main.cpp mainProject.cpp picoPNG.cpp Sprite.cpp
+         Sprite.cpp
+         picoPNG.cpp
+         mainProject.cpp
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(91): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(92): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(173): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(314): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(315): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(323): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(324): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(332): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(333): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(341): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(342): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(354): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(358): warning C4316: 'Sprite': object allocated on the heap may not be aligned 16
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(361): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(364): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(367): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(370): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(373): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(376): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(761): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\mainproject.cpp(767): warning C4018: '<': signed/unsigned mismatch
+         main.cpp
+         IOManager.cpp
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\iomanager.cpp(16): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\iomanager.cpp(20): warning C4244: '-=': conversion from 'std::streamoff' to 'int', possible loss of data
+         imageLoader.cpp
+         GLSLProgram.cpp
+         dataArray.cpp
+     1>c:\users\gabri\desktop\gameengine2\gameengine2\dataarray.cpp(12): warning C4154: deletion of an array expression; conversion to pointer supplied
+         Camera.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\gabri\Desktop\GameEngine2\Debug\GameEngine2.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\gabri\Desktop\GameEngine2\deps/lib/ SDL2.lib SDL2main.lib opengl32.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\gabri\Desktop\GameEngine2\Debug\GameEngine2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\gabri\Desktop\GameEngine2\Debug\GameEngine2.lib" /MACHINE:X86 Debug\Camera.obj
+         Debug\dataArray.obj
+         Debug\GLSLProgram.obj
+         Debug\imageLoader.obj
+         Debug\IOManager.obj
+         Debug\main.obj
+         Debug\mainProject.obj
+         Debug\picoPNG.obj
+         Debug\Sprite.obj
+         LINK : C:\Users\gabri\Desktop\GameEngine2\Debug\GameEngine2.exe not found or not built by the last incremental link; performing full link
+         GameEngine2.vcxproj -> C:\Users\gabri\Desktop\GameEngine2\Debug\GameEngine2.exe
+     1>Done Building Project "C:\Users\gabri\Desktop\GameEngine2\GameEngine2\GameEngine2.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.10
