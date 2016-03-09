@@ -36,21 +36,3 @@ void Camera::zoom(float distance) {
 	}
 	cameraMatrix = glm::ortho(x, width, y, height);
 }
-
-void Camera::pan(float up, float across) {
-	x += up;
-	if (x < 0.0f) {
-		x = 0.0f;
-	}
-	else if (x > (iniW - width)) {
-		x -= up;
-	}
-	y += across;
-	if (y < 0.0f) {
-		y = 0.0f;
-	}
-	else if (y >(iniH - height)) {
-		y -= across;
-	}
-	cameraMatrix = glm::ortho(x, width, y, height);
-}

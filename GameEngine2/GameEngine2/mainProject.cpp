@@ -76,11 +76,14 @@ void mainProject::run() {
 	
 	//create sprite batch for heatmaps
 	createHeatmaps(oneH, &dataOne, (currentLast - currentFirst));
+	/*
 	createHeatmaps(twoH, &dataTwo, (currentLast - currentFirst));
 	createHeatmaps(threeH, &dataThree, (currentLast - currentFirst));
 	createHeatmaps(fourH, &dataFour, (currentLast - currentFirst));
 	createHeatmaps(allH, &dataAll, ((currentLast - currentFirst) * 4));
+	*/
 
+	//bools for what to render
 	bool h = true; bool t = false; bool a = true; bool b = false; bool c = false; bool d = false; bool ch = false;
 	
 	//initially show heatmap for player one
@@ -88,14 +91,14 @@ void mainProject::run() {
 		sceneList.push_back(s);
 	}
 	//create sprites to show mode
+	/*
 	mode = new Sprite;
 	plyr = new Sprite;
 	mode->init(20.0, 400.0, 200.0, 100.0, heatmap);
 	plyr->init(20.0, 300.0, 200.0, 100.0, onePlayer);
 	sceneList.push_back(mode);
 	sceneList.push_back(plyr);
-	std::cout << "Heatmap Player 1" << std::endl << "Time: " << first << " - " << last << std::endl;
-
+	*/
 	//loop for input and draw
 	while (true) {
 		input(&h, &t, &a, &b, &c, &d, &ch, &dataOne, &dataTwo, &dataThree, &dataFour, &dataAll);
@@ -112,7 +115,7 @@ void mainProject::initSystems()
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	// create window
-	window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 750, 750, SDL_WINDOW_OPENGL);
 	if (window == nullptr) {
 		std::cout << "SDL Window could not be created!" << std::endl;
 	}
@@ -130,8 +133,6 @@ void mainProject::initSystems()
 	if (error != GLEW_OK) {
 		std::cout << "Could not initialise glew!" << std::endl;
 	}
-
-	//glGetString(GL_VERSION);
 
 	// create two windows for swapping between
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -204,6 +205,7 @@ void mainProject::readFile(dataArray* dataOne, dataArray* dataTwo, dataArray* da
 	std::ifstream myFile("..\\altlog.txt");
 	if (myFile.is_open())
 	{
+		std::cout << "File open" << std::endl;
 		//loop through lines in file
 		while (!myFile.eof())
 		{
@@ -233,12 +235,12 @@ void mainProject::readFile(dataArray* dataOne, dataArray* dataTwo, dataArray* da
 					setTime = true;
 				}
 				else if (numDelimeter == 3 && !setX) {
-					currentX = (std::stoi(currentWord) + 2000) / 4;
+					currentX = (std::stoi(currentWord) + 3000) / 6;
 					currentWord = "";
 					setX = true;
 				}
 				else if (numDelimeter == 4 && !setY) {
-					currentY = (std::stoi(currentWord) + 2000) / 4;
+					currentY = (std::stoi(currentWord) + 3000) / 6;
 					currentWord = "";
 					setY = true;
 				}
@@ -254,9 +256,10 @@ void mainProject::readFile(dataArray* dataOne, dataArray* dataTwo, dataArray* da
 			makeTrajectory(currentPlayer, currentX, currentY);
 
 			if (currentTime >= currentFirst && currentTime <= currentLast) {
+				//want it in value of 0 - 100 for array
 				currentX /= 10;
 				currentY /= 10;
-
+				//different players
 				if (currentPlayer == "P1") {
 					currentNum = dataOne->getArray(currentX, currentY);
 					currentNum++;
@@ -292,6 +295,7 @@ void mainProject::readFile(dataArray* dataOne, dataArray* dataTwo, dataArray* da
 			}
 		} //end of while
 		myFile.close();
+		//keep track of how long you have data for
 		if (lastFound < last) {
 			last = lastFound;
 		}
@@ -306,9 +310,11 @@ void mainProject::readFile(dataArray* dataOne, dataArray* dataTwo, dataArray* da
 }
 
 void mainProject::makeTrajectory(std::string player, int x, int y) {
+
 	int curX = x / 2;
 	int curY = y / 2;
-	
+	//store last values
+	//make sqaure using last values and current ones
 	if (player == "P1") {
 		if (oneLastX != 0 && oneLastY != 0 && (oneLastX != curX && oneLastY != curY) && ((curX - oneLastX) < 25 && (curX - oneLastX) > -25) && ((curY - oneLastY) < 25 && (curY - oneLastY) > -25)) {
 			Sprite* s = new Sprite;
@@ -348,15 +354,17 @@ void mainProject::makeTrajectory(std::string player, int x, int y) {
 }
 
 void mainProject::createHeatmaps(std::vector<Sprite*> &vec, dataArray* data, int num) {
+	//loop through array
 	for (int i = 0; i < 100; i++) {
 		for (int j = 0; j < 100; j++) {
 
 			float num2 = num;
-
+			//work out percentage player was in square
 			float a = (data->getArray(i, j)*100)/(num2);
-
+			if (a != 0)
+				std::cout << a << std::endl;
 			Sprite* s = new Sprite;
-
+			//decide texture based on percentage
 			if (a == 0) {
 				s->init((i * 5), (j * 5), 5.0, 5.0, dblue);
 			}
@@ -433,7 +441,7 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				break;
 			//change time
 			case SDLK_j:
-				currentFirst -= 10;
+				currentFirst -= 100;
 				if (currentFirst < first) {
 					currentFirst = first;
 				}
@@ -451,11 +459,11 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				createHeatmaps(twoH, dataTwo, (currentLast - currentFirst));
 				createHeatmaps(threeH, dataThree, (currentLast - currentFirst));
 				createHeatmaps(fourH, dataFour, (currentLast - currentFirst));
-				createHeatmaps(allH, dataAll, (currentLast - currentFirst));
+				createHeatmaps(allH, dataAll, ((currentLast - currentFirst) * 4));
 				*ch = true;
 				break;
 			case SDLK_k:
-				currentFirst += 10;
+				currentFirst += 100;
 				if (currentFirst > currentLast) {
 					currentFirst = currentLast;
 				}
@@ -473,11 +481,11 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				createHeatmaps(twoH, dataTwo, (currentLast - currentFirst));
 				createHeatmaps(threeH, dataThree, (currentLast - currentFirst));
 				createHeatmaps(fourH, dataFour, (currentLast - currentFirst));
-				createHeatmaps(allH, dataAll, (currentLast - currentFirst));
+				createHeatmaps(allH, dataAll, ((currentLast - currentFirst) * 4));
 				*ch = true;
 				break;
 			case SDLK_n:
-				currentLast -= 10;
+				currentLast -= 100;
 				if (currentFirst < currentFirst) {
 					currentFirst = currentFirst;
 				}
@@ -495,11 +503,11 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				createHeatmaps(twoH, dataTwo, (currentLast - currentFirst));
 				createHeatmaps(threeH, dataThree, (currentLast - currentFirst));
 				createHeatmaps(fourH, dataFour, (currentLast - currentFirst));
-				createHeatmaps(allH, dataAll, (currentLast - currentFirst));
+				createHeatmaps(allH, dataAll, ((currentLast - currentFirst) * 4));
 				*ch = true;
 				break;
 			case SDLK_m:
-				currentLast += 10;
+				currentLast += 100;
 				if (currentFirst > last) {
 					currentFirst = last;
 				}
@@ -517,7 +525,7 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				createHeatmaps(twoH, dataTwo, (currentLast - currentFirst));
 				createHeatmaps(threeH, dataThree, (currentLast - currentFirst));
 				createHeatmaps(fourH, dataFour, (currentLast - currentFirst));
-				createHeatmaps(allH, dataAll, (currentLast - currentFirst));
+				createHeatmaps(allH, dataAll, ((currentLast - currentFirst) * 4));
 				*ch = true;
 				break;
 			//camera movement
@@ -526,18 +534,6 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 				break;
 			case SDLK_s:
 				camera.zoom(-10.0f);
-				break;
-			case SDLK_UP:
-				camera.pan(10.0f, 0.0f);
-				break;
-			case SDLK_DOWN:
-				camera.pan(-10.0f, 0.0f);
-				break;
-			case SDLK_RIGHT:
-				camera.pan(0.0f, 10.0f);
-				break;
-			case SDLK_LEFT:
-				camera.pan(0.0f, -10.0f);
 				break;
 			}//end of keydown switch
 			break;
@@ -551,33 +547,38 @@ void mainProject::input(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bo
 }
 
 void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool* d, bool* ch) {
-	//output current mode
-	std::string curMode = "";
 	//only if changes have been made
 	if (*ch) {
 		//delete previous scene
 		sceneList.erase(sceneList.begin(), sceneList.end());
 		//remake scene
+		//based on bools from player input
+
+		//player one
 		if (*a && !*b && !*c && !*d) {
+			//heatmap or trajectory or both
 			if (*h && !*t) {
 				for each(Sprite* s in oneH) {
 					sceneList.push_back(s);
 				}
+				//change texture to show current mode
+				/*
 				mode->changeTexture(heatmap);
 				plyr->changeTexture(onePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap Player 1";
+				*/
 			}
 			else if (*t && !*h) {
 				for each(Sprite* s in oneT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(trajectory);
 				plyr->changeTexture(onePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Trajectory Player 1";
+				*/
 			}
 			else if (*t && *h) {
 				for each(Sprite* s in oneH) {
@@ -586,33 +587,37 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in oneT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmapAndTrajectory);
 				plyr->changeTexture(onePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory Player 1";
+				*/
 			}
 		}
+		//player two
 		else if (!*a && *b && !*c && !*d) {
 			if (*h && !*t) {
 				for each(Sprite* s in twoH) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmap);
 				plyr->changeTexture(twoPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap Player 2";
+				*/
 			}
 			else if (*t && !*h) {
 				for each(Sprite* s in twoT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(trajectory);
 				plyr->changeTexture(twoPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Trajectory Player 2";
+				*/
 			}
 			else if (*t && *h) {
 				for each(Sprite* s in twoH) {
@@ -621,33 +626,37 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in twoT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmapAndTrajectory);
 				plyr->changeTexture(twoPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory Player 2";
+				*/
 			}
 		}
+		//player 3
 		else if (!*a && !*b && *c && !*d) {
 			if (*h && !*t) {
 				for each(Sprite* s in threeH) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmap);
 				plyr->changeTexture(threePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap Player 3";
+				*/
 			}
 			else if (*t && !*h) {
 				for each(Sprite* s in threeT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(trajectory);
 				plyr->changeTexture(threePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Trajectory Player 3";
+				*/
 			}
 			else if (*t && *h) {
 				for each(Sprite* s in threeH) {
@@ -656,33 +665,37 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in threeT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmapAndTrajectory);
 				plyr->changeTexture(threePlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory Player 3";
+				*/
 			}
 		}
+		//player four
 		else if (!*a && !*b && !*c && *d) {
 			if (*h && !*t) {
 				for each(Sprite* s in fourH) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmap);
 				plyr->changeTexture(fourPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap Player 4";
+				*/
 			}
 			else if (*t && !*h) {
 				for each(Sprite* s in fourT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(trajectory);
 				plyr->changeTexture(fourPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Trajectory Player 4";
+				*/
 			}
 			else if (*t && *h) {
 				for each(Sprite* s in fourH) {
@@ -691,23 +704,26 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in fourT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmapAndTrajectory);
 				plyr->changeTexture(fourPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory Player 4";
+				*/
 			}
 		}
+		//all players
 		else if (*a && *b && *c && *d) {
 			if (*h && !*t) {
 				for each(Sprite* s in allH) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmap);
 				plyr->changeTexture(allPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap All Players";
+				*/
 			}
 			else if (*t && !*h) {
 				for each(Sprite* s in oneT) {
@@ -722,11 +738,12 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in fourT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(trajectory);
 				plyr->changeTexture(allPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory All Players";
+				*/
 			}
 			else if (*t && *h) {
 				for each(Sprite* s in allH) {
@@ -744,16 +761,15 @@ void mainProject::changeScene(bool* h, bool* t, bool* a, bool* b, bool* c, bool*
 				for each(Sprite* s in fourT) {
 					sceneList.push_back(s);
 				}
+				/*
 				mode->changeTexture(heatmapAndTrajectory);
 				plyr->changeTexture(allPlayer);
 				sceneList.push_back(mode);
 				sceneList.push_back(plyr);
-				curMode = "Heatmap & Trajectory All Players";
+				*/
 			}
 		}
 		*ch = false;
-		std::cout << curMode << std::endl;
-		std::cout << "Time: " << currentFirst << " - " << currentLast << std::endl;
 	}
 }
 

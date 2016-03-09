@@ -12,7 +12,6 @@ public:
 	void init(float screenWidth, float screenHeight);
 	glm::mat4 getCameraMatrix() { return cameraMatrix; }
 	void zoom(float distance);
-	void pan(float up, float across);
 
 private:
 	float x;
